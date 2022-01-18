@@ -1,0 +1,75 @@
+#include <raylib.h>
+#include <vector>
+#include <array>
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui/src/raygui.h"
+
+int main()
+{
+    const int screenWidth = 1600;
+    const int screenHeight = 900;
+
+    InitWindow(screenWidth, screenHeight, "*NOT* Geogebra");
+
+    SetTargetFPS(60);
+
+    std::vector<Vector2> points;
+    std::vector<std::array<Vector2, 2>> lines;
+
+    Vector2 lastLinePoint = { -1, -1 };
+
+    GuiEnable();
+
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+
+            if (GuiButton(Rectangle{screenWidth, screenWidth, 20, 10}, "CLEAR"))
+            {
+            }
+
+            for (int i = 0; i < 90; i++)
+            {
+                DrawLine(i*20, 0, i*20, screenHeight, GRAY);
+            }
+            for (int i = 0; i < 45; i++)
+            {
+                DrawLine(0, i*20, screenWidth, i*20, GRAY);
+            }
+            if (IsMouseButtonPressed(0))
+            {
+                Vector2 point = GetMousePosition();
+                point.x -= (int)point.x % 20;
+                point.y -= (int)point.y % 20;
+
+                points.push_back(point);
+            }
+            if (IsMouseButtonPressed(1))
+            {
+                if (lastLinePoint.x < 0 || lastLinePoint.y < 0)
+                {
+                    lastLinePoint = Vector2{ GetMousePosition().x - (int)GetMousePosition().x % 20, GetMousePosition().y - (int)GetMousePosition().y % 20 };
+                } else
+                {
+                    lines.push_back({ lastLinePoint, Vector2{ GetMousePosition().x - (int)GetMousePosition().x % 20, GetMousePosition().y - (int)GetMousePosition().y % 20 } });
+                    lastLinePoint = Vector2{ -1, -1 };
+                }
+            }
+
+            for (Vector2 p : points)
+            {
+                DrawCircleV(p, 7, BLACK);
+            }
+            for (auto l : lines) {
+                DrawLineEx(l[0], l[1], 5, BLUE);
+            }
+
+            if (lastLinePoint.x > 0 && lastLinePoint.y > 0) DrawCircleV(lastLinePoint, 7, BLUE);
+
+        EndDrawing();
+    }
+
+    GuiDisable();
+}
